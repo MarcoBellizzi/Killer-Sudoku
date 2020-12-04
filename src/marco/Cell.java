@@ -26,6 +26,6 @@ public class Cell {
 
     @Override
     public String toString() {
-        return "(" + i + "," + j + ")";
+        return "" + i + "," + j + ",";
     }
 }

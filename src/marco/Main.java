@@ -1,8 +1,6 @@
 package marco;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 
 public class Main {
@@ -16,7 +14,9 @@ public class Main {
         return n;
     }
 
-    public static void main(String[] args) {
+    public static String createDataFile() {
+        String file = "";
+
         try {
             String[] command = {
                     "/bin/sh",
@@ -54,14 +54,54 @@ public class Main {
                 }
             }
 
+            file += "n = 4;\n";
+            file += "num_of_regions = " + (sums.length -1) + ";\n";
+
+            int regions_max_size = 0;
+            for(ArrayList<Cell> list : regions) {
+                if(list.size() > regions_max_size) {
+                    regions_max_size = list.size();
+                }
+            }
+            file += "regions_max_size = " + regions_max_size + ";\n\n";
+            file += "regions = [|";
+
             int i = 0;
             for(ArrayList<Cell> region : regions) {
-                System.out.print("region " + (i+1) + ": sum = " + sums[i++] + " , size = " + region.size() + " , ");
+                file += "\n" + sums[i++] + ", " + region.size() + ", ";
                 for(Cell cell : region) {
-                    System.out.print(cell + " ");
+                    file += cell.toString() + " ";
                 }
-                System.out.println();
+                for(int j=region.size(); j<regions_max_size; j++) {
+                    file += "0,0, ";
+                }
+                file += "|";
             }
+            file += "];";
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return file;
+    }
+
+    public static void main(String[] args) {
+
+        try {
+            FileWriter myWriter = new FileWriter("./data.dzn");
+            myWriter.write(createDataFile());
+            myWriter.close();
+
+            StringBuffer output = new StringBuffer();
+            Process process = Runtime.getRuntime().exec("minizinc ./model.mzn ./data.dzn");
+
+            BufferedReader bufferedReaderOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String currentLine;
+            while ((currentLine = bufferedReaderOutput.readLine()) != null)
+                output.append(currentLine + "\n");
+
+            System.out.println(output.toString());
 
         } catch (IOException e) {
             e.printStackTrace();
