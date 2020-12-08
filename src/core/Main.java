@@ -1,4 +1,4 @@
-package marco;
+package core;
 
 import javax.swing.*;
 
