@@ -10,8 +10,8 @@ import java.util.ArrayList;
 
 public class Panel extends JPanel {
 
-    static int n = 2;           // number of rows
-    static int m = 2;           // number of columns
+    static int n = 3;           // number of rows
+    static int m = 3;           // number of columns
     static int difficulty = 1;  // difficulty of the sudoku
 
     static int[][] matrix;      // contains the element of the sudoku matrix
@@ -24,6 +24,7 @@ public class Panel extends JPanel {
     static Cell[] clickable;    // the number on the right, with the sudoku must be filled
 
     Image light_blue;           // light blue background image
+    Image red;                  // red background image
     String answer;              // the answer of the minizinc call
 
     public Panel() {
@@ -38,7 +39,8 @@ public class Panel extends JPanel {
             clickable[i] = new Cell(i, n*m + 1, i+1);
         }
         light_blue = loadAssets("../resources/light_blue.png");
-        answer = "";
+        red = loadAssets("../resources/red.jpg");
+        answer = " ";
 
         this.addMouseListener(new MouseAdapter() {
             @Override
@@ -51,10 +53,16 @@ public class Panel extends JPanel {
                     }
                 }
                 else if(e.getX() > 150 && e.getX() < 300 && e.getY() > 100 + m*n*50 && e.getY() < 100 + m*n*50 + 50) {  // solve button
-                    if(solve().charAt(0) == 'G')
+                    String output = solve();
+                    if(output.isEmpty()) {
+                        answer = "INPUT NOT COMPLETE";
+                    }
+                    else if(output.charAt(0) == 'G') {
                         answer = "GOOD JOB!";
-                    else
+                    }
+                    else {
                         answer = "WRONG ANSWER!";
+                    }
                     focus.setFocused(false);
                 }
                 else if(e.getX() < 100 || e.getX() > (100 + n*m*50) || e.getY() < 100 || e.getY() > (100 + n*m*50)) {  // out of the sudoku cells
@@ -227,12 +235,115 @@ public class Panel extends JPanel {
         return Toolkit.getDefaultToolkit().getImage(url);
     }
 
+    public static boolean verifyRow(int k) {
+        for(int i=0; i<n*m; i++) {
+            if(matrix[k][i] != 0) {
+                for(int j=i+1; j<n*m; j++) {
+                    if(matrix[k][i] == matrix[k][j]) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean verifyColumn(int k) {
+        for(int i=0; i<n*m; i++) {
+            if(matrix[i][k] != 0) {
+                for(int j=i+1; j<n*m; j++) {
+                    if(matrix[i][k] == matrix[j][k]) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean verifySector(int i, int j) {
+        for(int k=0; k<n; k++) {
+            for(int w=0; w<m; w++) {
+                if(matrix[k+(i*n)][w+(j*m)] != 0) {
+                    for(int a=k; a<n; a++) {
+                        for(int s=0; s<m; s++) {
+                            if(matrix[k+(i*n)][w+(j*m)] == matrix[a+(i*n)][s+(j*m)] && (k!=a || w!=s)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean verifyRegion(int region) {
+        for(int i=0; i<n*m; i++) {
+            for(int j=0; j<n*m; j++) {
+                if(regions[i][j] == region && matrix[i][j] != 0) {
+                    for(int k=i; k<n*m; k++) {
+                        for(int w=0; w<n*m; w++) {
+                            if(regions[k][w] == region && (i!=k || j!=w) && matrix[k][w] == matrix[i][j]) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static int getSumOfRegion(int region) {
+        int sum = 0;
+        for(int i=0; i<n*m; i++) {
+            for(int j=0; j<n*m; j++) {
+                if(regions[i][j] == region) {
+                    if(matrix[i][j] == 0) {
+                        return 0;    // region not complete
+                    }
+                    sum += matrix[i][j];
+                }
+            }
+        }
+        return sum;
+    }
+
     @Override
     public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        if(focus.isFocused()) {
+        for(int i=0; i<n*m; i++) {
+            if(verifyRow(i)) {   // draw the row in red if there are two element equals
+                g2d.drawImage(red, 100, 100 + i*50, n*m*50, 50, this);
+            }
+            if(verifyColumn(i)) {   // draw the column red if there are two element equals
+                g2d.drawImage(red, 100 + i*50, 100, 50, n*m*50, this);
+            }
+        }
+        for(int i=0; i<m; i++) {
+            for(int j=0; j<n; j++) {
+                if(verifySector(i,j)) {   // draw the sector red if there are two element equals
+                    g2d.drawImage(red, 100 + 50*m*j, 100 + 50*n*i, m*50, n*50, this);
+                }
+            }
+        }
+        for(int region=0; region< sumNumbers.length-1; region++) {
+            // draw the the region red if there are two element equals in the same region or the region is full and the sum if different
+            if(verifyRegion(region) || (getSumOfRegion(region) != 0 && getSumOfRegion(region) != convertToInt(sumNumbers[region]))) {
+                for(int i=0; i<n*m; i++) {
+                    for(int j=0; j<n*m; j++) {
+                        if(regions[i][j] == region) {
+                            g2d.drawImage(red, 100 + j*50, 100 + i*50, 50, 50, this);
+                        }
+                    }
+                }
+            }
+        }
+
+        if(focus.isFocused()) {   // draw light blu background in the cell where you click
             g2d.drawImage(light_blue, focus.getJ()*50 + 100, focus.getI()*50 + 100, 50, 50, this);
         }
 
@@ -263,7 +374,7 @@ public class Panel extends JPanel {
             }
         }
 
-        for(int i=0; i<n*m; i++) {
+        for(int i=0; i<n*m; i++) {   // elements to fill the sudoku
             g2d.drawString("" + clickable[i].getValue(), clickable[i].getJ()*50 + 100 + 17, clickable[i].getI()*50 + 100 + 37);
         }
 
@@ -273,13 +384,13 @@ public class Panel extends JPanel {
         g2d.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{3}, 0));
         for(int i=0; i<n*m; i++) {
             for(int j=0; j<n*m; j++) {
-                if((i == 0) || (regions[i][j] != regions[i-1][j]))   // margin up
+                if((i == 0) || (regions[i][j] != regions[i-1][j]))   // margin up region
                     g2d.drawLine(100 + j*50 + 5, 100 + i*50 + 5, 100 + j*50 + 45, 100 + i*50 + 5);
-                if((i == n*m -1) || (regions[i][j] != regions[i+1][j]))  // margin dow
+                if((i == n*m -1) || (regions[i][j] != regions[i+1][j]))  // margin down region
                     g2d.drawLine(100 + j*50 + 5, 100 + i*50 + 45, 100 + j*50 + 45, 100 + i*50 + 45);
-                if((j == 0) || (regions[i][j] != regions[i][j-1]))  // margin left
+                if((j == 0) || (regions[i][j] != regions[i][j-1]))  // margin left region
                     g2d.drawLine(100 + j*50 + 5, 100 + i*50 + 5, 100 + j*50 + 5, 100 + i*50 + 45);
-                if((j == n*m -1) || (regions[i][j] != regions[i][j+1])) // margin right
+                if((j == n*m -1) || (regions[i][j] != regions[i][j+1])) // margin right region
                     g2d.drawLine(100 + j*50 + 45, 100 + i*50 + 5, 100 + j*50 + 45, 100 + i*50 + 45);
             }
         }
