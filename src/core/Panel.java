@@ -10,8 +10,8 @@ import java.util.ArrayList;
 
 public class Panel extends JPanel {
 
-    static int n = 3;           // number of rows
-    static int m = 3;           // number of columns
+    static int n = 2;           // number of rows
+    static int m = 2;           // number of columns
     static int difficulty = 1;  // difficulty of the sudoku
 
     static int[][] matrix;      // contains the element of the sudoku matrix
@@ -34,10 +34,6 @@ public class Panel extends JPanel {
 
     public void initEventHandler() {
         focus = new Cell(this);
-        clickable = new Cell[n*m];
-        for(int i=0; i<n*m; i++) {
-            clickable[i] = new Cell(i, n*m + 1, i+1);
-        }
         light_blue = loadAssets("../resources/light_blue.png");
         red = loadAssets("../resources/red.jpg");
         answer = " ";
@@ -45,7 +41,56 @@ public class Panel extends JPanel {
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if(e.getX() > 100 + n*m*50 + 50 && e.getX() < 100 + n*m*50 + 100 && e.getY() > 100 && e.getY() < 100 + n*m*50) {  // one of the clickable
+                if(e.getY() < 60) {   // want to change size or difficulty
+                    if(e.getX() < 700/9) {
+                        n = 2;
+                        m = 2;
+                        difficulty = 1;
+                    }
+                    else if(e.getX() > 700/9 && e.getX() < 700/9*2) {
+                        n = 2;
+                        m = 2;
+                        difficulty = 2;
+                    }
+                    else if(e.getX() > 700/9*2 && e.getX() < 700/9*3) {
+                        n = 2;
+                        m = 2;
+                        difficulty = 3;
+                    }
+                    else if(e.getX() > 700/9*3 && e.getX() < 700/9*4) {
+                        n = 2;
+                        m = 3;
+                        difficulty = 1;
+                    }
+                    else if(e.getX() > 700/9*4 && e.getX() < 700/9*5) {
+                        n = 2;
+                        m = 3;
+                        difficulty = 2;
+                    }
+                    else if(e.getX() > 700/9*5 && e.getX() < 700/9*6) {
+                        n = 2;
+                        m = 3;
+                        difficulty = 3;
+                    }
+                    else if(e.getX() > 700/9*6 && e.getX() < 700/9*7) {
+                        n = 3;
+                        m = 3;
+                        difficulty = 1;
+                    }
+                    else if(e.getX() > 700/9*7 && e.getX() < 700/9*8) {
+                        n = 3;
+                        m = 3;
+                        difficulty = 2;
+                    }
+                    else {
+                        n = 3;
+                        m = 3;
+                        difficulty = 3;
+                    }
+                    createDataFile();
+                    focus.setFocused(false);
+                }
+                else if(e.getX() > 100 + n*m*50 + 50 && e.getX() < 100 + n*m*50 + 100 && e.getY() > 100 && e.getY() < 100 + n*m*50) {  // one of the clickable
                     if(focus.isFocused()) {
                         matrix[focus.getI()][focus.getJ()] = ((e.getY() - 100) / 50) + 1;
                         answer = "";
@@ -82,8 +127,10 @@ public class Panel extends JPanel {
 
     public static void createDataFile() {
         try {
+            clickable = new Cell[n*m];
             matrix = new int[n*m][n*m];
             for(int i=0; i<n*m; i++) {
+                clickable[i] = new Cell(i, n*m + 1, i+1);
                 for(int j=0; j<n*m; j++) {
                     matrix[i][j] = 0;
                 }
@@ -112,7 +159,6 @@ public class Panel extends JPanel {
             StringBuilder output = new StringBuilder();
             while ((currentLine = bufferedReaderOutput.readLine()) != null)
                 output.append(currentLine).append("\n");
-            System.err.println(output);
 
             String[] outputs = output.toString().split(";");
 
@@ -331,8 +377,8 @@ public class Panel extends JPanel {
             }
         }
         for(int region=0; region< sumNumbers.length-1; region++) {
-            // draw the the region red if there are two element equals in the same region or the region is full and the sum if different
-            if(verifyRegion(region) || (getSumOfRegion(region) != 0 && getSumOfRegion(region) != convertToInt(sumNumbers[region]))) {
+            // draw the the region red if there are two element equals in the same region or the region is full and the sum is different
+            if(verifyRegion(region) || (getSumOfRegion(region) != 0 && getSumOfRegion(region) != convertToInt(sumNumbers[region-1]))) {
                 for(int i=0; i<n*m; i++) {
                     for(int j=0; j<n*m; j++) {
                         if(regions[i][j] == region) {
@@ -397,15 +443,41 @@ public class Panel extends JPanel {
 
         g2d.setFont(new Font("TimesRoman", Font.PLAIN, 10));
         int sum = 0;
-        int i, j;
+        int row, col;
         for(int k=0; k<sumNumbers.length -1; k++) {     // sums of the regions
-            i = sum / (n*m);
-            j = sum % (n*m);
-            g2d.drawString(sumNumbers[k], 100 + j*50 + 10, 100 + i*50 + 15);
+            row = sum / (n*m);
+            col = sum % (n*m);
+            g2d.drawString(sumNumbers[k], 100 + col*50 + 10, 100 + row*50 + 15);
             if(sumChars[k].charAt(0) == '_')
                 sum += 1;
             else
                 sum += sumChars[k].charAt(0) - 95;
         }
+
+        g2d.setFont(new Font("TimesRoman", Font.PLAIN, 15));
+        g2d.setStroke(new BasicStroke(3));
+        g2d.drawLine(0, 60, 700, 60);
+        for(int i=1; i<9; i++) {
+            g2d.drawLine(700/9*i, 0, 700/9*i, 60);
+        }
+        g2d.drawString("2x2", 22, 25);
+        g2d.drawString("EASY", 15, 45);
+        g2d.drawString("2x2", 700/9 + 22, 25);
+        g2d.drawString("MEDIUM", 700/9 + 4, 45);
+        g2d.drawString("2x2", 700/9*2 + 22, 25);
+        g2d.drawString("HARD", 700/9*2 + 13, 45);
+        g2d.drawString("2x3", 700/9*3+ 22, 25);
+        g2d.drawString("EASY", 700/9*3 + 15, 45);
+        g2d.drawString("2x3", 700/9*4 + 22, 25);
+        g2d.drawString("MEDIUM", 700/9*4 + 4, 45);
+        g2d.drawString("2x3", 700/9*5 + 22, 25);
+        g2d.drawString("HARD", 700/9*5 + 13, 45);
+        g2d.drawString("3X3", 700/9*6 + 22, 25);
+        g2d.drawString("EASY", 700/9*6 + 15, 45);
+        g2d.drawString("3X3", 700/9*7 + 22, 25);
+        g2d.drawString("MEDIUM", 700/9*7 + 4, 45);
+        g2d.drawString("3X3", 700/9*8 + 22, 25);
+        g2d.drawString("HARD", 700/9*8 + 13, 45);
+
     }
 }
