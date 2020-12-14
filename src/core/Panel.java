@@ -27,9 +27,10 @@ public class Panel extends JPanel {
     Image red;                  // red background image
     String answer;              // the answer of the minizinc call
 
+    String state = "help";   // can be welcome, rules or game
+
     public Panel() {
         initEventHandler();
-        createDataFile();
     }
 
     public void initEventHandler() {
@@ -88,6 +89,21 @@ public class Panel extends JPanel {
                         difficulty = 3;
                     }
                     createDataFile();
+                    answer = "";
+                    state = "game";
+                    focus.setFocused(false);
+                }
+                else if(e.getX() < 120 && e.getY() > 620) {   // click on HELP
+                    if(state.equals("help"))
+                        state = "game";
+                    else state = "help";
+                    focus.setFocused(false);
+
+                }
+                else if(e.getX() > 580 && e.getY() > 620) {   // click on RULES
+                    if(state.equals("rules"))
+                        state = "game";
+                    else state = "rules";
                     focus.setFocused(false);
                 }
                 else if(e.getX() > 100 + n*m*50 + 50 && e.getX() < 100 + n*m*50 + 100 && e.getY() > 100 && e.getY() < 100 + n*m*50) {  // one of the clickable
@@ -361,6 +377,63 @@ public class Panel extends JPanel {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
 
+        g2d.setFont(new Font("TimesRoman", Font.PLAIN, 15));
+        g2d.setStroke(new BasicStroke(3));
+        g2d.drawLine(0, 60, 700, 60);
+        for(int i=1; i<9; i++) {
+            g2d.drawLine(700/9*i, 0, 700/9*i, 60);
+        }
+        g2d.drawString("2x2", 22, 25);
+        g2d.drawString("EASY", 15, 45);
+        g2d.drawString("2x2", 700/9 + 22, 25);
+        g2d.drawString("MEDIUM", 700/9 + 4, 45);
+        g2d.drawString("2x2", 700/9*2 + 22, 25);
+        g2d.drawString("HARD", 700/9*2 + 13, 45);
+        g2d.drawString("2x3", 700/9*3+ 22, 25);
+        g2d.drawString("EASY", 700/9*3 + 15, 45);
+        g2d.drawString("2x3", 700/9*4 + 22, 25);
+        g2d.drawString("MEDIUM", 700/9*4 + 4, 45);
+        g2d.drawString("2x3", 700/9*5 + 22, 25);
+        g2d.drawString("HARD", 700/9*5 + 13, 45);
+        g2d.drawString("3X3", 700/9*6 + 22, 25);
+        g2d.drawString("EASY", 700/9*6 + 15, 45);
+        g2d.drawString("3X3", 700/9*7 + 22, 25);
+        g2d.drawString("MEDIUM", 700/9*7 + 4, 45);
+        g2d.drawString("3X3", 700/9*8 + 22, 25);
+        g2d.drawString("HARD", 700/9*8 + 13, 45);
+
+
+        g2d.setFont(new Font("TimesRoman", Font.PLAIN, 30));
+        g2d.drawString("HELP", 10, 650);
+        g2d.drawString("RULES", 580, 650);
+
+        if(state.equals("help")) {
+            g2d.drawString("KILLER SUDOKU - HELP", 100, 150);
+            g2d.setFont(new Font("TimesRoman", Font.PLAIN, 20));
+            g2d.drawString("Select the size and the difficulty on the top menù.", 100, 250);
+            g2d.drawString("To fill the cells, click the respective cell, then click the", 100, 300 );
+            g2d.drawString("number on the right you want to put inside the cell.", 100, 330);
+            g2d.drawString("To empty a cell just click it.", 100, 380);
+            g2d.drawString("To check the solution click on SOLVE.", 100, 430);
+            g2d.drawString("Click on HELP to show this window", 100, 480);
+            g2d.drawString("Click on RULES the see the rules.", 100, 530);
+            return;
+        }
+        else if(state.equals("rules")) {
+            g2d.drawString("KILLER SUDOKU - RULES", 100, 150);
+            g2d.setFont(new Font("TimesRoman", Font.PLAIN, 20));
+            g2d.drawString("Killer Sudoku is a logic puzzle with simple rules", 100, 200);
+            g2d.drawString("and challenging solutions.", 100, 230 );
+            g2d.drawString("The rules of Killer Sudoku are simple:", 100, 280);
+            g2d.drawString("1. The basic Sudoku rules apply.", 100, 330);
+            g2d.drawString("2. The sum of all numbers in a cage must match", 100, 380);
+            g2d.drawString("   the small number printed in its corner.", 100, 410);
+            g2d.drawString("3. No number appears more than once in a cage.", 100, 460);
+            g2d.drawString("Click on HELP to show the help window", 100, 510);
+            g2d.drawString("Click on RULES the see this window.", 100, 560);
+            return;
+        }
+
         for(int i=0; i<n*m; i++) {
             if(verifyRow(i)) {   // draw the row in red if there are two element equals
                 g2d.drawImage(red, 100, 100 + i*50, n*m*50, 50, this);
@@ -453,31 +526,6 @@ public class Panel extends JPanel {
             else
                 sum += sumChars[k].charAt(0) - 95;
         }
-
-        g2d.setFont(new Font("TimesRoman", Font.PLAIN, 15));
-        g2d.setStroke(new BasicStroke(3));
-        g2d.drawLine(0, 60, 700, 60);
-        for(int i=1; i<9; i++) {
-            g2d.drawLine(700/9*i, 0, 700/9*i, 60);
-        }
-        g2d.drawString("2x2", 22, 25);
-        g2d.drawString("EASY", 15, 45);
-        g2d.drawString("2x2", 700/9 + 22, 25);
-        g2d.drawString("MEDIUM", 700/9 + 4, 45);
-        g2d.drawString("2x2", 700/9*2 + 22, 25);
-        g2d.drawString("HARD", 700/9*2 + 13, 45);
-        g2d.drawString("2x3", 700/9*3+ 22, 25);
-        g2d.drawString("EASY", 700/9*3 + 15, 45);
-        g2d.drawString("2x3", 700/9*4 + 22, 25);
-        g2d.drawString("MEDIUM", 700/9*4 + 4, 45);
-        g2d.drawString("2x3", 700/9*5 + 22, 25);
-        g2d.drawString("HARD", 700/9*5 + 13, 45);
-        g2d.drawString("3X3", 700/9*6 + 22, 25);
-        g2d.drawString("EASY", 700/9*6 + 15, 45);
-        g2d.drawString("3X3", 700/9*7 + 22, 25);
-        g2d.drawString("MEDIUM", 700/9*7 + 4, 45);
-        g2d.drawString("3X3", 700/9*8 + 22, 25);
-        g2d.drawString("HARD", 700/9*8 + 13, 45);
 
     }
 }
