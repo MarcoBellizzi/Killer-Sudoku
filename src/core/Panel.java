@@ -27,7 +27,7 @@ public class Panel extends JPanel {
     Image red;                  // red background image
     String answer;              // the answer of the minizinc call
 
-    String state = "help";   // can be welcome, rules or game
+    String state = "help";      // can be help, rules or game
 
     public Panel() {
         initEventHandler();

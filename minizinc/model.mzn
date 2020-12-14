@@ -10,9 +10,15 @@ array[1..num_of_regions, 1..(regions_max_size * 2 + 2)] of int: regions;
 set of int: dom = 1..9;
 array[1..n*m, 1..n*m] of dom : matrix;
 
-constraint assert(forall(i in 1..n*m, j in 1..n*m) (
+constraint assert(forall(i in 1..n*m, j in 1..n*m) (  % user input validation
     matrix[i,j] > 0 /\ matrix[i,j] <= n*m
-), "wrong input value");
+), "wrong user input value");
+
+constraint assert(forall(i in 1..num_of_regions) (   % site input validation
+  forall(j in 1..regions[1, 2]) (
+    regions[i, j*2 +1] > 0 /\ regions[i, j*2 +2] <= n*m
+  )
+), "wrong site input value");
 
 constraint forall(i in 1..n*m) (    % elements in each row are different
   alldifferent([matrix[i, j] | j in 1..n*m])
