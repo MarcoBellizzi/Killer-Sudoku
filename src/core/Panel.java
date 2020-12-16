@@ -10,9 +10,9 @@ import java.util.ArrayList;
 
 public class Panel extends JPanel {
 
-    static int n = 2;           // number of rows
-    static int m = 2;           // number of columns
-    static int difficulty = 1;  // difficulty of the sudoku
+    static int n;           // number of rows
+    static int m;           // number of columns
+    static int difficulty;  // difficulty of the sudoku
 
     static int[][] matrix;      // contains the element of the sudoku matrix
     static int[][] regions;     // contains the region of each element

@@ -15,7 +15,7 @@ constraint assert(forall(i in 1..n*m, j in 1..n*m) (  % user input validation
 ), "wrong user input value");
 
 constraint assert(forall(i in 1..num_of_regions) (   % site input validation
-  forall(j in 1..regions[1, 2]) (
+  forall(j in 1..regions[i, 2]) (
     regions[i, j*2 +1] > 0 /\ regions[i, j*2 +2] <= n*m
   )
 ), "wrong site input value");
