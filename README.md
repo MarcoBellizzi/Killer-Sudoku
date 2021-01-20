@@ -1,6 +1,6 @@
 # Killer-Sudoku
 
-Killer sudoku s a puzzle that combines elements of sudoku and kakuro.
+Killer sudoku is a puzzle that combines elements of sudoku and kakuro.
 
 The rules are the following:
 - Each row, column, and sector contains each number exactly once.
