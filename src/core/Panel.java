@@ -164,9 +164,8 @@ public class Panel extends JPanel {
             if(n == 3 && m == 3 && difficulty == 3) size = "?size=8";
 
             String[] command = {
-                    "/bin/sh",
-                    "-c",
-                    "curl https://www.puzzle-killer-sudoku.com/" + size + " | grep task | sed \"s/.*task = '//\" | sed \"s/'.*//\""
+//                    "/bin/sh", "-c", "curl https://www.puzzle-killer-sudoku.com/" + size + " | grep task"
+                    "cmd", "/c", "curl -o .\\minizinc\\curl.txt https://www.puzzle-killer-sudoku.com/" + size + " | findstr task .\\minizinc\\curl.txt"
             };
 
             Process process = Runtime.getRuntime().exec(command);
@@ -176,7 +175,9 @@ public class Panel extends JPanel {
             while ((currentLine = bufferedReaderOutput.readLine()) != null)
                 output.append(currentLine).append("\n");
 
-            String[] outputs = output.toString().split(";");
+            String o = output.toString().replaceFirst(".*task = '", "").replaceFirst("'.*", "");
+
+            String[] outputs = o.split(";");
 
             regions = new int[n*m][n*m];
             String[] regionsString = outputs[1].split(",");
